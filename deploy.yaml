@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: test
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: 852421539909.dkr.ecr.ap-southeast-1.amazonaws.com/app:1.0
+        imagePullPolicy: Always
+        ports:
+          - name: web
+            containerPort: 80
+      imagePullSecrets:
+          - name: regcred
