@@ -3,7 +3,7 @@
 * aws cli installed
 * kubectl installed
 
-1. Make sure your SSO account has the following permissions. 
+1. Create a iam user and attach inline policy as below. 
 ```
 {
     "Version": "2012-10-17",
@@ -30,33 +30,37 @@
 }
 ```
 
-2. Authenticate aws cli . Go to SSO page and Copy the and paste the aws secret keys for 
+2. Get the security credentials for the user created
 ```
-export AWS_ACCESS_KEY_ID="replaceme"
-export AWS_SECRET_ACCESS_KEY="replaceme"
-export AWS_SESSION_TOKEN="replaceme"
-```
-3. Make sure authentication works 
-```
-aws sts get-caller-identity
+AWS_ACCESS_KEY_ID="replaceme"
+AWS_SECRET_ACCESS_KEY="replaceme"
+AWS_DEFAULT_REGION="region"
 ```
 
-4. Export env for your account. copy paste with you values
+3. Create a kubernetes secret for the ecr registry
 ```
-export AWS_ACCOUNT=<aws account id>
-export AWS_REGION=<ECR region>
-export NAMESPACE=<namespace of your application>
-```
-5. Create a kubernetes secret for the ecr registry
-```
-kubectl create secret docker-registry regcred  \
---docker-server=${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com \
---docker-username=AWS \
---docker-password=$(aws ecr get-login-password) \
-  --namespace=$NAMESPACE || true
+kubectl create secret generic ecr-creds-test --namespace replaceme  --from-literal=AWS_DEFAULT_REGION=replaceme --from-literal=AWS_SECRET_ACCESS_KEY=replaceme --from-literal=AWS_ACCESS_KEY_ID=replaceme --from-literal=ACCOUNT=replaceme  --from-literal=SECRET_NAME=regcred
 ```
 
-6. Once the secret is created,  update your k8s deployment to use this secret, as imagePullsecrets parameter:
+4. There is a `cronjob.yaml` manifest in zip folder which containers cronjob resource.
+`NB: replace namesapce section with your application namespace` 
+Apply the resource
+
+```
+kubectl apply -f cronjob.yaml && kubectl get cronjobs
+```
+
+5. for the first time you need to trigger job manually as first job will trigger after 6hours
+```
+kubectl create job --from=cronjob/ecr-cred-helper ecr-cred-helper-manual
+```
+
+6. By now a job pod needs to running and a secret regcred should have been created
+```
+kubectl get secret --namespace replaceme
+```
+
+7. Finally update deployment with the secret regcred as below,as imagePullsecrets parameter:
 
  `For example`
  ```
