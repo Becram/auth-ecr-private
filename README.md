@@ -39,7 +39,7 @@ AWS_DEFAULT_REGION="region"
 
 3. Create a kubernetes secret for the ecr registry
 ```
-kubectl create secret generic ecr-creds-test --namespace replaceme  --from-literal=AWS_DEFAULT_REGION=replaceme --from-literal=AWS_SECRET_ACCESS_KEY=replaceme --from-literal=AWS_ACCESS_KEY_ID=replaceme --from-literal=ACCOUNT=replaceme  --from-literal=SECRET_NAME=regcred
+kubectl create secret generic ecr-creds --namespace replaceme  --from-literal=AWS_DEFAULT_REGION=replaceme --from-literal=AWS_SECRET_ACCESS_KEY=replaceme --from-literal=AWS_ACCESS_KEY_ID=replaceme --from-literal=ACCOUNT=replaceme  --from-literal=SECRET_NAME=regcred
 ```
 
 4. There is a `cronjob.yaml` manifest in zip folder which containers cronjob resource.
